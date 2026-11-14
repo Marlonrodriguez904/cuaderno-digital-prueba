@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0f766e">
+<title>Cuaderno Digital</title>
+<style>
+  :root{
+    --verde:#0f766e; --verde2:#14b8a6; --rojo:#dc2626; --ok:#16a34a;
+    --fondo:#f1f5f4; --card:#fff; --texto:#1f2937; --gris:#6b7280; --borde:#e5e7eb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--texto);font-size:17px}
+  header{background:var(--verde);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px}
+  .marca{flex:1;min-width:0}
+  .marca .app{font-size:11.5px;font-weight:800;letter-spacing:1.2px;color:#99f6e4;white-space:nowrap}
+  .marca .app span{font-weight:500;letter-spacing:.3px;text-transform:none;color:#ccfbf1}
+  header h1{font-size:20px;margin:1px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header button{background:rgba(255,255,255,.18);border:0;color:#fff;font-size:20px;border-radius:10px;width:42px;height:42px}
+  #demoBar{background:#fef3c7;color:#92400e;text-align:center;font-size:14px;padding:7px 10px}
+  #demoBar a{color:#92400e;font-weight:700}
+  main{padding:14px;max-width:560px;margin:0 auto;padding-bottom:100px}
+  .resumen{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .box{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .box small{color:var(--gris);font-size:13px;display:block}
+  .box b{font-size:22px}
+  .rojo{color:var(--rojo)} .ok{color:var(--ok)}
+  input,textarea,select{width:100%;font-size:18px;padding:13px;border:1.5px solid var(--borde);border-radius:12px;background:#fff;font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--verde2)}
+  .buscar{margin-bottom:10px}
+  .filtros{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto}
+  .filtros button{border:1.5px solid var(--borde);background:#fff;border-radius:20px;padding:8px 14px;font-size:15px;white-space:nowrap}
+  .filtros button.on{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .cli{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer}
+  .avatar{width:44px;height:44px;border-radius:50%;background:#ccfbf1;color:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0}
+  .cli .nom{flex:1;min-width:0}
+  .cli .nom div{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cli .nom small{color:var(--gris);font-size:13px}
+  .cli .monto{font-weight:700;font-size:18px;text-align:right}
+  .alerta{color:#b45309;font-size:12px;font-weight:600}
+  .fab{position:fixed;right:18px;bottom:22px;background:var(--verde);color:#fff;border:0;border-radius:30px;padding:16px 22px;font-size:18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  .btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-size:19px;font-weight:700;color:#fff;margin-top:10px}
+  .b-rojo{background:var(--rojo)} .b-ok{background:var(--ok)} .b-verde{background:var(--verde)}
+  .b-wsp{background:#25d366} .b-gris{background:#e5e7eb;color:var(--texto)}
+  .fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .saldoGrande{text-align:center;padding:20px}
+  .saldoGrande b{font-size:38px;display:block;margin-top:4px}
+  .mov{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--borde);gap:8px}
+  .mov:last-child{border-bottom:0}
+  .mov small{color:var(--gris);font-size:13px;display:block}
+  .mov .x{background:none;border:0;color:#9ca3af;font-size:18px;padding:4px 8px}
+  h3{margin:18px 4px 8px;font-size:16px;color:var(--gris);font-weight:600}
+  .vacio{text-align:center;color:var(--gris);padding:30px 10px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .modal.on{display:flex}
+  .hoja{background:#fff;width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:20px 16px 26px;max-height:92vh;overflow:auto}
+  .hoja h2{margin:0 0 14px;font-size:21px}
+  .hoja label{display:block;font-size:14px;color:var(--gris);margin:12px 0 5px}
+  .montoInput{font-size:32px!important;font-weight:700;text-align:center}
+  .rapidos{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .rapidos button{flex:1;min-width:60px;border:1.5px solid var(--borde);background:#f9fafb;border-radius:10px;padding:10px;font-size:16px;font-weight:600}
+  #bloqueo{position:fixed;inset:0;background:var(--verde);color:#fff;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+  #bloqueo.on{display:flex}
+  #bloqueo h2{font-size:26px;margin:10px 0}
+  #bloqueo p{font-size:18px;line-height:1.45;max-width:420px}
+  #bloqueo a{background:#25d366;color:#fff;text-decoration:none;font-weight:700;font-size:20px;padding:16px 26px;border-radius:16px;margin-top:16px;display:inline-block}
+  .punto{position:absolute;top:5px;right:5px;width:11px;height:11px;border-radius:50%;background:#ef4444;border:2px solid var(--verde);display:none}
+  .punto.on{display:block}
+  /* Saldo tocable */
+  .saldoGrande.tocable{cursor:pointer;border:2px solid transparent}
+  .saldoGrande.tocable:active{border-color:var(--verde2)}
+  .verDetalle{display:inline-block;margin-top:10px;background:#f0fdfa;color:var(--verde);font-weight:700;font-size:15px;padding:8px 14px;border-radius:20px}
+  /* Historial más grande en el perfil */
+  .movG{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--borde);gap:8px}
+  .movG:last-child{border-bottom:0}
+  .movG .t{font-size:18px;font-weight:600}
+  .movG .d{font-size:15px;color:var(--gris);margin-top:2px}
+  .movG .m{font-size:20px;font-weight:800;white-space:nowrap}
+  /* Estado de cuenta detallado */
+  .tot3{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .tot3 .box b{font-size:24px}
+  .saldoFinal{background:var(--rojo);color:#fff;border-radius:16px;padding:18px;text-align:center;margin-bottom:6px}
+  .saldoFinal.aldia{background:var(--ok)}
+  .saldoFinal small{font-size:16px;opacity:.9;display:block}
+  .saldoFinal b{font-size:42px;display:block}
+  .saldoFinal span{font-size:15px;opacity:.9}
+  .dia{font-size:17px;font-weight:800;color:var(--verde);margin:20px 4px 8px;text-transform:capitalize}
+  .det{background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06);border-left:7px solid var(--rojo)}
+  .det.pago{border-left-color:var(--ok)}
+  .det .fila1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .det .tipo{font-size:20px;font-weight:700}
+  .det .monto{font-size:28px;font-weight:800;white-space:nowrap}
+  .det .hora{font-size:16px;color:var(--gris);margin-top:2px}
+  .det .que{font-size:19px;margin-top:8px;background:#f9fafb;padding:10px 12px;border-radius:10px}
+  .det .quedo{font-size:17px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--borde);display:flex;justify-content:space-between}
+  .det .quedo b{font-size:19px}
+  .orden{display:flex;gap:8px;margin:14px 0 4px}
+  .orden button{flex:1;border:1.5px solid var(--borde);background:#fff;border-radius:12px;padding:12px;font-size:16px;font-weight:600}
+  .orden button.on{background:var(--verde);color:#fff;border-color:var(--verde)}
+  /* Novedades */
+  /* Recuadros tocables del inicio */
+  .box.tocar{cursor:pointer;position:relative;transition:transform .1s}
+  .box.tocar:active{transform:scale(.98);background:#f9fafb}
+  .verMas{display:block;margin-top:6px;font-size:13px;font-weight:700;color:var(--verde)}
+  .rlista{margin:0 -4px}
+  .rsub{color:var(--gris);font-size:15px;margin:-6px 4px 8px}
+  .rfila{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--borde);cursor:pointer}
+  .rfila:active{background:#f9fafb}
+  .rfila .rn{flex:1;min-width:0}
+  .rfila .rn div{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rfila .rn small{font-size:14px;color:var(--gris)}
+  .rfila .rn small.alerta{color:#b45309;font-weight:700}
+  .rfila b{font-size:19px;white-space:nowrap}
+  .rfila .flecha{color:#9ca3af;font-size:22px}
+  .hoja h2 span{white-space:nowrap}
+  /* Franja de novedades en inicio */
+  .bannerNov{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#7c3aed,#db2777 55%,#f59e0b);color:#fff;border-radius:16px;padding:15px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+  .bannerNov::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:brillo 3.5s infinite}
+  @keyframes brillo{0%{left:-60%}60%,100%{left:130%}}
+  .bannerNov .gif{font-size:34px;animation:salto 2s infinite}
+  @keyframes salto{0%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-5px) rotate(-8deg)}30%{transform:translateY(0) rotate(6deg)}}
+  .bannerNov b{font-size:18px;display:block}
+  .bannerNov small{font-size:14px;opacity:.95}
+  .pill{display:inline-block;background:#fff;color:#db2777;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.5px;vertical-align:middle}
+  /* Página de novedades */
+  .heroNov{background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border-radius:20px;padding:22px 18px;text-align:center;margin-bottom:16px}
+  .heroNov .big{font-size:46px}
+  .heroNov h2{margin:6px 0 6px;font-size:25px;line-height:1.2}
+  .heroNov p{margin:0;font-size:16px;opacity:.95;line-height:1.4}
+  .pro{position:relative;background:linear-gradient(145deg,#1e1b4b,#4c1d95);color:#fff;border-radius:20px;padding:22px 18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(76,29,149,.35);overflow:hidden}
+  .pro::before{content:'';position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.45),transparent 70%)}
+  .pro .etq{display:inline-block;background:#fbbf24;color:#1e1b4b;font-weight:800;font-size:12px;letter-spacing:1px;padding:5px 11px;border-radius:20px}
+  .pro h3{color:#fff;margin:12px 0 4px;font-size:25px;font-weight:800}
+  .pro .sub{font-size:16px;opacity:.9;margin-bottom:12px;line-height:1.4}
+  .pro ul{list-style:none;padding:0;margin:0 0 6px}
+  .pro li{font-size:17px;padding:9px 0;border-top:1px solid rgba(255,255,255,.12);display:flex;gap:10px;align-items:center}
+  .pro .btn{background:#fbbf24;color:#1e1b4b;font-size:19px;box-shadow:0 4px 0 #b45309}
+  .pro .nota{text-align:center;font-size:13px;opacity:.8;margin-top:10px}
+  .tituloSec{font-size:19px;font-weight:800;margin:6px 4px 12px;color:var(--texto)}
+  .nov{position:relative;background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-top:6px solid var(--c,#14b8a6)}
+  .nov .cab{display:flex;align-items:center;gap:12px}
+  .nov .ic{font-size:30px;width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--cf,#ccfbf1);flex-shrink:0}
+  .nov h4{margin:0;font-size:20px;line-height:1.2}
+  .nov .tag{position:absolute;top:12px;right:12px;background:var(--c,#14b8a6);color:#fff;font-size:11px;font-weight:800;padding:4px 9px;border-radius:20px;letter-spacing:.5px}
+  .nov p{margin:12px 0 0;font-size:17px;line-height:1.45;color:#374151}
+  .nov .precio{margin-top:10px;font-weight:800;color:var(--c,var(--verde));font-size:18px}
+  .nov .btn{background:var(--c,#25d366)}
+  .ideas{background:#fff;border:2px dashed #cbd5e1;border-radius:18px;padding:18px;text-align:center;margin-top:6px}
+  .ideas b{font-size:18px}
+  .ideas p{margin:6px 0 0;color:var(--gris);font-size:15px}
+  /* Bienvenida */
+  .bienv{text-align:center}
+  .bienv .big{font-size:56px}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:50;display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="btnAtras" style="display:none" onclick="ir('inicio')">←</button>
+  <div class="marca">
+    <div class="app">📒 CUADERNO DIGITAL <span>de fiados</span></div>
+    <h1 id="titulo">Mi Bodega</h1>
+  </div>
+  <button onclick="ir('novedades')" title="Novedades" style="position:relative">🎁<span id="puntoNuevo" class="punto"></span></button>
+  <button onclick="ir('ajustes')" title="Ajustes">⚙️</button>
+</header>
+<div id="demoBar"></div>
+<main id="app"></main>
+
+<!-- Modal genérico -->
+<div class="modal" id="modal" onclick="if(event.target===this)cerrarModal()">
+  <div class="hoja" id="hoja"></div>
+</div>
+
+<!-- Pantalla de demo vencido -->
+<div id="bloqueo">
+  <div style="font-size:60px">📒</div>
+  <h2>Tu periodo de prueba terminó</h2>
+  <p>Gracias por probar el Cuaderno Digital. Tus datos siguen guardados.<br><br>
+  Para seguir usándolo, activa tu plan mensual con soporte por WhatsApp.</p>
+  <a id="linkPago" target="_blank">💬 Activar por WhatsApp</a>
+</div>
+
+<!-- Aviso de confirmación propio (reemplaza las ventanitas del navegador) -->
+<div class="modal" id="dlg" style="z-index:40;align-items:center;padding:20px">
+  <div class="hoja" style="border-radius:20px" id="dlgHoja"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== CONFIGURACIÓN DEL DEMO =====================
+   Cambia DEMO_HASTA para cada bodega (formato AAAA-MM-DD).
+   El último día que funciona es esa fecha; al día siguiente se bloquea. */
+const DEMO_HASTA   = '2026-11-20';
+const MI_WHATSAPP  = '51932552673';
+const MENSAJE_PAGO = 'Hola, quiero activar mi Cuaderno Digital para mi bodega.';
+
+/* ===================== NOVEDADES (publicidad de mejoras) ==========
+   Edita esta lista para anunciar mejoras. Cada vez que agregues una
+   nueva, sube el número de NOVEDADES_VERSION para que al dueño le
+   aparezca el puntito rojo de "nuevo".
+   precio: texto libre ('S/ 10 al mes', 'Incluido en tu plan', '' = no mostrar)
+   etiqueta: texto corto en la esquina ('POPULAR', 'NUEVO', '' = nada)
+   color / fondo: color de la tarjeta y del círculo del ícono */
+const NOVEDADES_VERSION = 2;
+const NOVEDADES = [
+  { icono:'☁️', titulo:'Tus datos en la nube', etiqueta:'POPULAR', color:'#0284c7', fondo:'#e0f2fe',
+    texto:'Nunca más pierdas tu cuaderno. Si se malogra o te roban el celular, tus clientes y deudas siguen a salvo.',
+    precio:'' },
+  { icono:'📱', titulo:'Úsalo en varios celulares', etiqueta:'', color:'#7c3aed', fondo:'#ede9fe',
+    texto:'Tú, tu esposa o tus hijos pueden anotar fiados desde su propio celular y todos ven lo mismo al instante.',
+    precio:'' },
+  { icono:'📣', titulo:'Cobrar a todos de una vez', etiqueta:'NUEVO', color:'#db2777', fondo:'#fce7f3',
+    texto:'Envía el recordatorio por WhatsApp a todos los clientes atrasados con un solo botón. ¡Cobra más en menos tiempo!',
+    precio:'' },
+  { icono:'📊', titulo:'Reporte de la semana', etiqueta:'', color:'#ea580c', fondo:'#ffedd5',
+    texto:'Mira cuánto fiaste, cuánto cobraste y quiénes son tus mejores y peores pagadores.',
+    precio:'' },
+  { icono:'📲', titulo:'Ícono en tu pantalla', etiqueta:'', color:'#16a34a', fondo:'#dcfce7',
+    texto:'Abre tu cuaderno como una app más del celular, sin entrar al navegador.',
+    precio:'' },
+];
+
+/* Tarjeta grande "Próximamente" (plan Pro). Pon null para ocultarla. */
+const PROXIMAMENTE = {
+  titulo:'Cuaderno Digital PRO',
+  sub:'Tu bodega completa en el celular: fiados, ventas y productos, todo conectado.',
+  puntos:[
+    ['🛒','Vende con un toque y el fiado se anota solo'],
+    ['📦','Tu stock se descuenta en cada venta'],
+    ['⚠️','Te avisa qué productos se están acabando'],
+    ['💰','Mira cuánto ganaste hoy'],
+    ['🧾','Caja del día: efectivo, Yape y fiado'],
+  ],
+  boton:'🙋 ¡Quiero ser de los primeros!',
+  nota:'Los primeros en anotarse tendrán precio especial de lanzamiento',
+};
+/* ================================================================== */
+
+const KEY = 'fiados_v1';
+let db = cargar();
+let filtro = 'deben';
+let busqueda = '';
+
+function cargar(){
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if(d && d.clientes) return d;
+  }catch(e){}
+  return {bodega:'Mi Bodega', diasAlerta:15, clientes:[], movs:[]};
+}
+function guardar(){ try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){ toast('No se pudo guardar'); } }
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const soles = n => 'S/ ' + (Math.round(n*100)/100).toFixed(2);
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Fecha según la hora del celular (Perú), no la hora internacional
+const diaLocal = ts => { const d = new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const hoyStr = () => diaLocal(Date.now());
+const movsHoy = tipo => db.movs.filter(m=>m.tipo===tipo && diaLocal(m.f)===hoyStr()).sort((a,b)=>b.f-a.f);
+
+/* Detalle al tocar los recuadros del inicio */
+function detalleResumen(que){
+  const nom = id => (db.clientes.find(c=>c.id===id)||{nombre:'(cliente eliminado)'}).nombre;
+  const hora = ts => new Date(ts).toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit'});
+  let titulo, total, filas;
+  if(que==='deben'){
+    const l = db.clientes.map(c=>({c, s:saldo(c.id), dd:diasDebiendo(c.id)})).filter(x=>x.s>0.001).sort((a,b)=>b.s-a.s);
+    total = l.reduce((s,x)=>s+x.s,0);
+    titulo = `💰 Me deben <span class="rojo">${soles(total)}</span>`;
+    filas = l.map(x=>`
+      <div class="rfila" onclick="cerrarModal();ir('cliente','${x.c.id}')">
+        <div class="avatar">${esc(x.c.nombre.trim().charAt(0).toUpperCase())}</div>
+        <div class="rn"><div>${esc(x.c.nombre)}</div>
+          <small class="${x.dd>=db.diasAlerta?'alerta':''}">${x.dd>=db.diasAlerta?'⏰ ':''}${x.dd===0?'Debe desde hoy':x.dd===1?'Debe desde ayer':'Debe hace '+x.dd+' días'}</small></div>
+        <b class="rojo">${soles(x.s)}</b><span class="flecha">›</span>
+      </div>`).join('');
+    if(!l.length) filas = `<div class="vacio">Nadie te debe 🎉</div>`;
+  } else {
+    const l = movsHoy(que);
+    total = l.reduce((s,m)=>s+m.monto,0);
+    titulo = que==='fiado' ? `📝 Fiado hoy <span class="rojo">${soles(total)}</span>` : `💵 Cobrado hoy <span class="ok">${soles(total)}</span>`;
+    filas = l.map(m=>`
+      <div class="rfila" onclick="cerrarModal();ir('cliente','${m.cid}')">
+        <div class="avatar">${esc(nom(m.cid).trim().charAt(0).toUpperCase())}</div>
+        <div class="rn"><div>${esc(nom(m.cid))}</div>
+          <small>🕐 ${hora(m.f)}${m.det?' · '+esc(m.det):''}</small></div>
+        <b class="${que==='fiado'?'rojo':'ok'}">${soles(m.monto)}</b><span class="flecha">›</span>
+      </div>`).join('');
+    if(!l.length) filas = `<div class="vacio">${que==='fiado'?'Hoy no fiaste a nadie':'Hoy nadie pagó todavía'}</div>`;
+    else filas = `<div class="rsub">${l.length} ${que==='fiado'?'fiado':'pago'}${l.length===1?'':'s'} · ${new Set(l.map(m=>m.cid)).size} cliente${new Set(l.map(m=>m.cid)).size===1?'':'s'}</div>` + filas;
+  }
+  abrirModal(`
+    <h2>${titulo}</h2>
+    <div class="rlista">${filas}</div>
+    <button class="btn b-gris" onclick="cerrarModal()">Cerrar</button>`);
+}
+
+function fechaCorta(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('es-PE',{day:'2-digit',month:'short'}) + ' ' +
+         d.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+}
+function saldo(cid){
+  return db.movs.filter(m=>m.cid===cid).reduce((s,m)=> s + (m.tipo==='fiado'? m.monto : -m.monto), 0);
+}
+function ultimoPago(cid){
+  const p = db.movs.filter(m=>m.cid===cid && m.tipo==='pago').sort((a,b)=>b.f-a.f)[0];
+  return p ? p.f : null;
+}
+function primerFiadoPendiente(cid){
+  // fecha desde la que debe (aprox.: fiado más antiguo después del último saldo cero)
+  const ms = db.movs.filter(m=>m.cid===cid).sort((a,b)=>a.f-b.f);
+  let s=0, desde=null;
+  for(const m of ms){
+    s += m.tipo==='fiado'? m.monto : -m.monto;
+    if(s<=0.001){ desde=null; } else if(desde===null){ desde=m.f; }
+  }
+  return desde;
+}
+function diasDebiendo(cid){
+  const d = primerFiadoPendiente(cid);
+  return d ? Math.floor((Date.now()-d)/86400000) : 0;
+}
+function telWsp(t){
+  let n = String(t||'').replace(/\D/g,'');
+  if(n.length===9) n = '51'+n;
+  return n;
+}
+
+/* ===================== DEMO ===================== */
+function revisarDemo(){
+  const fin = new Date(DEMO_HASTA+'T23:59:59');
+  const ahora = new Date();
+  document.getElementById('linkPago').href = 'https://wa.me/'+MI_WHATSAPP+'?text='+encodeURIComponent(MENSAJE_PAGO+' ('+db.bodega+')');
+  if(ahora > fin){ document.getElementById('bloqueo').classList.add('on'); return false; }
+  const dias = Math.ceil((fin-ahora)/86400000);
+  document.getElementById('demoBar').innerHTML =
+    `Versión de prueba · ${dias<=1?'último día':'quedan '+dias+' días'} · <a href="https://wa.me/${MI_WHATSAPP}?text=${encodeURIComponent(MENSAJE_PAGO)}" target="_blank">Activar</a>`;
+  return true;
+}
+
+/* ===================== NAVEGACIÓN ===================== */
+function ir(vista, id){
+  location.hash = id ? vista+'/'+id : vista;
+}
+window.addEventListener('hashchange', render);
+
+function render(){
+  if(!revisarDemo()) return;
+  const [vista,id] = (location.hash.slice(1)||'inicio').split('/');
+  document.getElementById('btnAtras').style.display = vista==='inicio' ? 'none' : 'block';
+  document.getElementById('btnAtras').onclick = () => ir('inicio');
+  window.scrollTo(0,0);
+  marcarNovedades();
+  if(vista==='cliente' && db.clientes.find(c=>c.id===id)) return vCliente(id);
+  if(vista==='cuenta' && db.clientes.find(c=>c.id===id)) return vCuenta(id);
+  if(vista==='novedades') return vNovedades();
+  if(vista==='ajustes') return vAjustes();
+  vInicio();
+}
+
+/* ===================== INICIO ===================== */
+function vInicio(){
+  document.getElementById('titulo').textContent = db.bodega;
+  const total = db.clientes.reduce((s,c)=>s+Math.max(0,saldo(c.id)),0);
+  const cobradoHoy = movsHoy('pago').reduce((s,m)=>s+m.monto,0);
+  const fiadoHoy  = movsHoy('fiado').reduce((s,m)=>s+m.monto,0);
+  const nDeben = db.clientes.filter(c=>saldo(c.id)>0.001).length;
+
+  let lista = db.clientes.map(c=>({...c, s:saldo(c.id), dd:diasDebiendo(c.id)}));
+  if(busqueda) lista = lista.filter(c=>c.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+  if(filtro==='deben') lista = lista.filter(c=>c.s>0.001).sort((a,b)=>b.s-a.s);
+  else if(filtro==='atrasados') lista = lista.filter(c=>c.s>0.001 && c.dd>=db.diasAlerta).sort((a,b)=>b.dd-a.dd);
+  else lista.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  const html = `
+    <div class="box tocar" style="margin-bottom:10px" onclick="detalleResumen('deben')">
+      <small>Total que me deben</small>
+      <b class="rojo" style="font-size:30px">${soles(total)}</b>
+      <small>${nDeben} cliente${nDeben===1?'':'s'} con deuda</small>
+      <span class="verMas">Ver quiénes ›</span>
+    </div>
+    <div class="resumen">
+      <div class="box tocar" onclick="detalleResumen('fiado')"><small>Fiado hoy</small><b class="rojo">${soles(fiadoHoy)}</b><span class="verMas">Ver ›</span></div>
+      <div class="box tocar" onclick="detalleResumen('pago')"><small>Cobrado hoy</small><b class="ok">${soles(cobradoHoy)}</b><span class="verMas">Ver ›</span></div>
+    </div>
+    ${NOVEDADES.length || PROXIMAMENTE ? `<div class="bannerNov" onclick="ir('novedades')">
+      <div class="gif">🎁</div>
+      <div style="flex:1;position:relative;z-index:1"><b>Novedades para tu bodega <span class="pill">NUEVO</span></b><small>Descubre cómo vender más y ordenarte mejor</small></div>
+      <div style="font-size:26px;font-weight:700">›</div>
+    </div>` : ''}
+    <input class="buscar" id="q" placeholder="🔍 Buscar cliente..." value="${esc(busqueda)}"
+      oninput="busqueda=this.value;vInicioLista()" autocomplete="off">
+    <div class="filtros">
+      <button class="${filtro==='deben'?'on':''}" onclick="filtro='deben';vInicio()">Me deben</button>
+      <button class="${filtro==='atrasados'?'on':''}" onclick="filtro='atrasados';vInicio()">⏰ Atrasados</button>
+      <button class="${filtro==='todos'?'on':''}" onclick="filtro='todos';vInicio()">Todos</button>
+    </div>
+    <div id="lista">${listaHTML(lista)}</div>
+    <button class="fab" onclick="modalCliente()">+ Cliente</button>`;
+  document.getElementById('app').innerHTML = html;
+}
+function vInicioLista(){
+  // re-render solo la lista para no perder el foco del buscador
+  let lista = db.clientes.map(c=>({...c, s:saldo(c.id), dd:diasDebiendo(c.id)}));
+  if(busqueda) lista = lista.filter(c=>c.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+  if(filtro==='deben') lista = lista.filter(c=>c.s>0.001).sort((a,b)=>b.s-a.s);
+  else if(filtro==='atrasados') lista = lista.filter(c=>c.s>0.001 && c.dd>=db.diasAlerta).sort((a,b)=>b.dd-a.dd);
+  else lista.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  document.getElementById('lista').innerHTML = listaHTML(lista);
+}
+function listaHTML(lista){
+  if(!db.clientes.length) return `<div class="vacio">Aún no tienes clientes.<br>Toca <b>+ Cliente</b> para anotar el primero.</div>`;
+  if(!lista.length) return `<div class="vacio">${busqueda?'No se encontró ese nombre.':filtro==='atrasados'?'Nadie atrasado 🎉':'Nadie te debe 🎉'}</div>`;
+  return lista.map(c=>`
+    <div class="cli" onclick="ir('cliente','${c.id}')">
+      <div class="avatar">${esc(c.nombre.trim().charAt(0).toUpperCase())}</div>
+      <div class="nom">
+        <div>${esc(c.nombre)}</div>
+        ${c.s>0.001 && c.dd>=db.diasAlerta ? `<span class="alerta">⏰ debe hace ${c.dd} días</span>` :
+          `<small>${c.tel?esc(c.tel):'Sin celular'}</small>`}
+      </div>
+      <div class="monto ${c.s>0.001?'rojo':'ok'}">${c.s>0.001?soles(c.s):(c.s<-0.001?'A favor '+soles(-c.s):'Al día')}</div>
+    </div>`).join('');
+}
+
+/* ===================== CLIENTE ===================== */
+function vCliente(id){
+  const c = db.clientes.find(x=>x.id===id);
+  const s = saldo(id);
+  document.getElementById('titulo').textContent = c.nombre;
+  const movs = db.movs.filter(m=>m.cid===id).sort((a,b)=>b.f-a.f);
+  const dd = diasDebiendo(id);
+  const up = ultimoPago(id);
+  document.getElementById('app').innerHTML = `
+    <div class="box saldoGrande tocable" onclick="ir('cuenta','${id}')">
+      <small style="font-size:16px">${s>0.001?'Debe':s<-0.001?'Tiene a favor':'Está al día'}</small>
+      <b class="${s>0.001?'rojo':'ok'}">${soles(Math.abs(s))}</b>
+      <small style="font-size:15px">${s>0.001 && dd>0 ? 'Debe desde hace '+dd+' día'+(dd===1?'':'s')+' · ' : ''}${up?'Último pago: '+fechaCorta(up):'Sin pagos aún'}</small>
+      ${c.limite ? `<small style="margin-top:4px;font-size:15px">Límite de fiado: ${soles(c.limite)}${s>=c.limite?' <b class="rojo" style="font-size:14px;display:inline">· LÍMITE ALCANZADO</b>':''}</small>`:''}
+      ${c.nota ? `<small style="margin-top:4px;font-size:15px">📌 ${esc(c.nota)}</small>`:''}
+      ${movs.length ? `<span class="verDetalle">🔍 Toca para ver el detalle</span>`:''}
+    </div>
+    <div class="fila">
+      <button class="btn b-rojo" onclick="modalMov('${id}','fiado')">📝 Fiar</button>
+      <button class="btn b-ok" onclick="modalMov('${id}','pago')">💵 Pagó</button>
+    </div>
+    ${c.tel ? `<button class="btn b-wsp" onclick="recordar('${id}')">💬 Enviar cuenta por WhatsApp</button>` :
+      `<button class="btn b-gris" onclick="modalCliente('${id}')">Agregar celular para enviar recordatorios</button>`}
+    <h3 style="font-size:18px">Últimos movimientos</h3>
+    <div class="box" style="padding:4px 14px">
+      ${movs.length ? movs.slice(0,5).map(m=>`
+        <div class="movG">
+          <div style="flex:1;min-width:0">
+            <div class="t">${m.tipo==='fiado'?'📝 Fió':'💵 Pagó'}${m.det?' · '+esc(m.det):''}</div>
+            <div class="d">${fechaLarga(m.f)}</div>
+          </div>
+          <span class="m ${m.tipo==='fiado'?'rojo':'ok'}">${m.tipo==='fiado'?'+':'−'} ${soles(m.monto)}</span>
+        </div>`).join('') : '<div class="vacio">Sin movimientos todavía</div>'}
+    </div>
+    ${movs.length ? `<button class="btn b-verde" onclick="ir('cuenta','${id}')">📋 Ver cuenta completa (${movs.length})</button>`:''}
+    <div class="fila" style="margin-top:6px">
+      <button class="btn b-gris" onclick="modalCliente('${id}')">✏️ Editar</button>
+      <button class="btn b-gris" onclick="borrarCliente('${id}')">🗑️ Eliminar</button>
+    </div>`;
+}
+
+/* ===================== CUENTA DETALLADA ===================== */
+let ordenCuenta = 'reciente';
+function fechaLarga(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('es-PE',{weekday:'short',day:'numeric',month:'short'}) + ' · ' +
+         d.toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit'});
+}
+function diaTitulo(ts){
+  const d = new Date(ts); d.setHours(0,0,0,0);
+  const h = new Date(); h.setHours(0,0,0,0);
+  const dif = Math.round((h-d)/86400000);
+  if(dif===0) return 'Hoy';
+  if(dif===1) return 'Ayer';
+  return d.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long',year: d.getFullYear()!==h.getFullYear()?'numeric':undefined});
+}
+function vCuenta(id){
+  const c = db.clientes.find(x=>x.id===id);
+  document.getElementById('titulo').textContent = 'Cuenta de ' + c.nombre;
+  document.getElementById('btnAtras').onclick = () => ir('cliente', id);
+  // saldo acumulado en orden cronológico
+  const asc = db.movs.filter(m=>m.cid===id).sort((a,b)=>a.f-b.f);
+  let acum = 0;
+  const conSaldo = asc.map(m=>{ acum += m.tipo==='fiado'? m.monto : -m.monto; return {...m, quedo:acum}; });
+  const totF = asc.filter(m=>m.tipo==='fiado').reduce((s,m)=>s+m.monto,0);
+  const totP = asc.filter(m=>m.tipo==='pago').reduce((s,m)=>s+m.monto,0);
+  const s = acum;
+  const lista = ordenCuenta==='reciente' ? [...conSaldo].reverse() : conSaldo;
+
+  let html = `
+    <div class="saldoFinal ${s>0.001?'':'aldia'}">
+      <small>${s>0.001?'Debe en total':s<-0.001?'Tiene a favor':'Está al día'}</small>
+      <b>${soles(Math.abs(s))}</b>
+      ${s>0.001 && diasDebiendo(id)>0 ? `<span>Debe desde hace ${diasDebiendo(id)} día${diasDebiendo(id)===1?'':'s'}</span>`:''}
+    </div>
+    <div class="tot3">
+      <div class="box"><small style="font-size:15px">Total fiado</small><b class="rojo">${soles(totF)}</b></div>
+      <div class="box"><small style="font-size:15px">Total pagado</small><b class="ok">${soles(totP)}</b></div>
+    </div>
+    <div class="orden">
+      <button class="${ordenCuenta==='reciente'?'on':''}" onclick="ordenCuenta='reciente';vCuenta('${id}')">Más reciente primero</button>
+      <button class="${ordenCuenta==='antiguo'?'on':''}" onclick="ordenCuenta='antiguo';vCuenta('${id}')">Más antiguo primero</button>
+    </div>`;
+
+  if(!lista.length) html += `<div class="vacio">Sin movimientos todavía</div>`;
+  let diaAnt = '';
+  for(const m of lista){
+    const dt = diaTitulo(m.f);
+    if(dt!==diaAnt){ html += `<div class="dia">📅 ${dt}</div>`; diaAnt = dt; }
+    const hora = new Date(m.f).toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit'});
+    html += `
+      <div class="det ${m.tipo}">
+        <div class="fila1">
+          <div>
+            <div class="tipo">${m.tipo==='fiado'?'📝 Se llevó fiado':'💵 Pagó'}</div>
+            <div class="hora">🕐 ${hora}</div>
+          </div>
+          <div class="monto ${m.tipo==='fiado'?'rojo':'ok'}">${m.tipo==='fiado'?'+':'−'} ${soles(m.monto)}</div>
+        </div>
+        ${m.det ? `<div class="que">${m.tipo==='fiado'?'🛒 ':'📝 '}${esc(m.det)}</div>`:''}
+        <div class="quedo">
+          <span>Después de esto ${m.quedo>0.001?'debía':m.quedo<-0.001?'tenía a favor':'quedó'}:</span>
+          <b class="${m.quedo>0.001?'rojo':'ok'}">${Math.abs(m.quedo)<=0.001?'Al día ✓':soles(Math.abs(m.quedo))}</b>
+        </div>
+        <div style="text-align:right;margin-top:6px">
+          <button class="x" style="background:none;border:0;color:#9ca3af;font-size:15px;padding:6px" onclick="borrarMov('${m.id}')">🗑️ Borrar este movimiento</button>
+        </div>
+      </div>`;
+  }
+  if(c.tel && lista.length) html += `<button class="btn b-wsp" onclick="recordar('${id}')">💬 Enviar cuenta por WhatsApp</button>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+/* ===================== NOVEDADES ===================== */
+function marcarNovedades(){
+  let visto = 0;
+  try{ visto = parseInt(localStorage.getItem('fiados_nov_visto'))||0; }catch(e){}
+  document.getElementById('puntoNuevo').classList.toggle('on', NOVEDADES.length>0 && visto < NOVEDADES_VERSION);
+}
+function vNovedades(){
+  document.getElementById('titulo').textContent = '🎁 Novedades';
+  try{ localStorage.setItem('fiados_nov_visto', NOVEDADES_VERSION); }catch(e){}
+  marcarNovedades();
+  const wsp = t => 'https://wa.me/'+MI_WHATSAPP+'?text='+encodeURIComponent(t);
+  const P = PROXIMAMENTE;
+  document.getElementById('app').innerHTML = `
+    <div class="heroNov">
+      <div class="big">🚀</div>
+      <h2>Haz crecer tu bodega</h2>
+      <p>Tu Cuaderno Digital sigue mejorando. Mira lo nuevo y activa lo que te sirva. ¡Te ayudamos por WhatsApp!</p>
+    </div>
+
+    ${P ? `<div class="pro">
+      <span class="etq">⭐ PRÓXIMAMENTE</span>
+      <h3>${esc(P.titulo)}</h3>
+      <div class="sub">${esc(P.sub)}</div>
+      <ul>${P.puntos.map(([i,t])=>`<li><span style="font-size:22px">${i}</span><span>${esc(t)}</span></li>`).join('')}</ul>
+      <a class="btn" style="text-align:center;text-decoration:none" target="_blank"
+         href="${wsp('Hola, quiero ser de los primeros en tener el '+P.titulo+' ('+db.bodega+')')}">${esc(P.boton)}</a>
+      ${P.nota ? `<div class="nota">${esc(P.nota)}</div>`:''}
+    </div>` : ''}
+
+    ${NOVEDADES.length ? `<div class="tituloSec">✨ Mejoras que puedes activar</div>` : ''}
+    ${NOVEDADES.map(n=>`
+      <div class="nov" style="--c:${n.color||'#14b8a6'};--cf:${n.fondo||'#ccfbf1'}">
+        ${n.etiqueta ? `<span class="tag">${esc(n.etiqueta)}</span>`:''}
+        <div class="cab">
+          <div class="ic">${n.icono}</div>
+          <h4 style="${n.etiqueta?'padding-right:70px':''}">${esc(n.titulo)}</h4>
+        </div>
+        <p>${esc(n.texto)}</p>
+        ${n.precio ? `<div class="precio">${esc(n.precio)}</div>`:''}
+        <a class="btn" style="text-align:center;text-decoration:none" target="_blank"
+           href="${wsp('Hola, me interesa: '+n.titulo+' ('+db.bodega+')')}">💬 Lo quiero</a>
+      </div>`).join('')}
+
+    <div class="ideas">
+      <div style="font-size:34px">💡</div>
+      <b>¿Qué más te gustaría tener?</b>
+      <p>Cuéntanos tu idea y la hacemos realidad para tu bodega.</p>
+      <a class="btn b-wsp" style="text-align:center;text-decoration:none" target="_blank"
+         href="${wsp('Hola, tengo una idea para el Cuaderno Digital ('+db.bodega+'): ')}">💬 Enviar mi idea</a>
+    </div>`;
+}
+
+function recordar(id){
+  const c = db.clientes.find(x=>x.id===id);
+  const s = saldo(id);
+  const ult = db.movs.filter(m=>m.cid===id).sort((a,b)=>b.f-a.f).slice(0,5);
+  let txt = `Hola ${c.nombre}, le saluda *${db.bodega}* 👋\n\n`;
+  if(s>0.001){
+    txt += `Le recordamos que tiene un saldo pendiente de *${soles(s)}*.\n\nÚltimos movimientos:\n`;
+    txt += ult.map(m=>`• ${new Date(m.f).toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'})} ${m.tipo==='fiado'?'Fiado':'Pago'} ${soles(m.monto)}${m.det?' ('+m.det+')':''}`).join('\n');
+    txt += `\n\n¡Gracias por su preferencia! 🙏`;
+  } else {
+    txt += `Su cuenta está al día. ¡Gracias por su preferencia! 🙏`;
+  }
+  window.open('https://wa.me/'+telWsp(c.tel)+'?text='+encodeURIComponent(txt),'_blank');
+}
+
+/* ===================== MODALES ===================== */
+function abrirModal(html){ document.getElementById('hoja').innerHTML = html; document.getElementById('modal').classList.add('on'); }
+function cerrarModal(){ document.getElementById('modal').classList.remove('on'); }
+
+function modalCliente(id){
+  const c = id ? db.clientes.find(x=>x.id===id) : {nombre:'',tel:'',limite:'',nota:''};
+  abrirModal(`
+    <h2>${id?'Editar cliente':'Nuevo cliente'}</h2>
+    <label>Nombre *</label>
+    <input id="fNom" value="${esc(c.nombre)}" placeholder="Ej: Doña Rosa" autocomplete="off">
+    <label>Celular (para WhatsApp)</label>
+    <input id="fTel" value="${esc(c.tel)}" placeholder="Ej: 987654321" inputmode="tel">
+    <label>Límite de fiado (opcional)</label>
+    <input id="fLim" value="${c.limite||''}" placeholder="Ej: 100" inputmode="decimal">
+    <label>Nota (opcional)</label>
+    <input id="fNota" value="${esc(c.nota||'')}" placeholder="Ej: paga los sábados" autocomplete="off">
+    <button class="btn b-verde" onclick="guardarCliente('${id||''}')">Guardar</button>
+    <button class="btn b-gris" onclick="cerrarModal()">Cancelar</button>`);
+  setTimeout(()=>document.getElementById('fNom').focus(),100);
+}
+/* Aviso propio: preguntar('texto', [{t:'Botón', c:'b-verde', fn:()=>{}}, ...]) */
+function preguntar(msg, botones){
+  const h = document.getElementById('dlgHoja');
+  h.innerHTML = `<p style="font-size:19px;line-height:1.4;margin:4px 0 8px">${msg}</p>` +
+    botones.map((b,i)=>`<button class="btn ${b.c||'b-gris'}" data-i="${i}">${b.t}</button>`).join('') +
+    `<button class="btn b-gris" data-i="x">Cancelar</button>`;
+  h.querySelectorAll('button').forEach(el=>el.onclick=()=>{
+    document.getElementById('dlg').classList.remove('on');
+    const b = botones[el.dataset.i]; if(b && b.fn) b.fn();
+  });
+  document.getElementById('dlg').classList.add('on');
+}
+
+function guardarCliente(id, forzar){
+  const nombre = document.getElementById('fNom').value.trim();
+  if(!nombre) return toast('Escribe el nombre');
+  const telTxt = document.getElementById('fTel').value.trim();
+  const dig = telTxt.replace(/\D/g,'');
+  if(dig && !(dig.length===9 || (dig.length===11 && dig.startsWith('51')))){
+    return toast('El celular debe tener 9 números (ahora tiene '+dig.length+')');
+  }
+  const datos = {
+    nombre,
+    tel: telTxt,
+    limite: parseFloat(document.getElementById('fLim').value.replace(',','.'))||0,
+    nota: document.getElementById('fNota').value.trim()
+  };
+  if(id){ Object.assign(db.clientes.find(x=>x.id===id), datos); }
+  else{
+    const igual = db.clientes.find(x=>x.nombre.trim().toLowerCase()===nombre.toLowerCase());
+    if(igual && !forzar){
+      return preguntar(`Ya tienes un cliente llamado <b>${esc(igual.nombre)}</b>.`, [
+        {t:'Ver a '+esc(igual.nombre), c:'b-verde', fn:()=>{ cerrarModal(); ir('cliente', igual.id); }},
+        {t:'Crear otro con el mismo nombre', c:'b-gris', fn:()=>guardarCliente('', true)}
+      ]);
+    }
+    id = uid(); db.clientes.push({id, ...datos, creado:Date.now()});
+  }
+  guardar(); cerrarModal(); toast('Cliente guardado ✓'); ir('cliente', id); render();
+}
+function borrarCliente(id){
+  const c = db.clientes.find(x=>x.id===id);
+  const s = saldo(id);
+  preguntar(`¿Eliminar a <b>${esc(c.nombre)}</b>?${s>0.001?'<br>Todavía debe <b class="rojo">'+soles(s)+'</b>.':''}<br>Se borrará todo su historial.`, [
+    {t:'Sí, eliminar', c:'b-rojo', fn:()=>{
+      db.clientes = db.clientes.filter(x=>x.id!==id);
+      db.movs = db.movs.filter(m=>m.cid!==id);
+      guardar(); toast('Cliente eliminado'); ir('inicio');
+    }}
+  ]);
+}
+
+function modalMov(cid, tipo){
+  const c = db.clientes.find(x=>x.id===cid);
+  const s = saldo(cid);
+  const rap = tipo==='fiado' ? [1,2,5,10,20,50] : (s>0.001 ? [5,10,20,50] : [5,10,20]);
+  abrirModal(`
+    <h2>${tipo==='fiado'?'📝 Fiar a ':'💵 Pago de '}${esc(c.nombre)}</h2>
+    ${tipo==='pago' && s>0.001 ? `<small style="color:var(--gris)">Debe ${soles(s)}</small>`:''}
+    <label>Monto (S/)</label>
+    <input id="fMonto" class="montoInput" inputmode="decimal" placeholder="0.00" autocomplete="off">
+    <div class="rapidos">
+      ${rap.map(v=>`<button onclick="sumar(${v})">+${v}</button>`).join('')}
+      ${tipo==='pago' && s>0.001 ? `<button style="flex-basis:100%;background:#dcfce7;border-color:#86efac" onclick="document.getElementById('fMonto').value='${(Math.round(s*100)/100).toFixed(2)}'">Pagó todo (${soles(s)})</button>`:''}
+    </div>
+    <label>${tipo==='fiado'?'¿Qué se llevó? (opcional)':'Nota (opcional)'}</label>
+    <input id="fDet" placeholder="${tipo==='fiado'?'Ej: arroz, aceite, pan':'Ej: Yape'}" autocomplete="off">
+    <button class="btn ${tipo==='fiado'?'b-rojo':'b-ok'}" onclick="guardarMov('${cid}','${tipo}')">Guardar ${tipo==='fiado'?'fiado':'pago'}</button>
+    <button class="btn b-gris" onclick="cerrarModal()">Cancelar</button>`);
+  setTimeout(()=>document.getElementById('fMonto').focus(),100);
+}
+function sumar(v){
+  const i = document.getElementById('fMonto');
+  const n = (parseFloat(i.value.replace(',','.'))||0) + v;
+  i.value = Number.isInteger(n) ? n : n.toFixed(2);
+}
+function guardarMov(cid, tipo, forzar){
+  const monto = parseFloat(document.getElementById('fMonto').value.replace(',','.'));
+  if(!(monto>0)) return toast('Escribe un monto válido');
+  const c = db.clientes.find(x=>x.id===cid);
+  if(tipo==='fiado' && c.limite && saldo(cid)+monto > c.limite && !forzar){
+    return preguntar(`Con esto <b>${esc(c.nombre)}</b> pasaría su límite de <b>${soles(c.limite)}</b>.<br>Quedaría debiendo <b class="rojo">${soles(saldo(cid)+monto)}</b>.`, [
+      {t:'Fiar igual', c:'b-rojo', fn:()=>guardarMov(cid, tipo, true)}
+    ]);
+  }
+  db.movs.push({id:uid(), cid, tipo, monto:Math.round(monto*100)/100, det:document.getElementById('fDet').value.trim(), f:Date.now()});
+  guardar(); cerrarModal();
+  toast(tipo==='fiado'?'Fiado anotado ✓':'Pago registrado ✓');
+  render();
+}
+function borrarMov(mid){
+  const m = db.movs.find(x=>x.id===mid);
+  preguntar(`¿Borrar este ${m.tipo==='fiado'?'fiado':'pago'} de <b>${soles(m.monto)}</b> del ${fechaLarga(m.f)}?`, [
+    {t:'Sí, borrar', c:'b-rojo', fn:()=>{
+      db.movs = db.movs.filter(x=>x.id!==mid);
+      guardar(); toast('Borrado'); render();
+    }}
+  ]);
+}
+
+/* ===================== AJUSTES ===================== */
+function vAjustes(){
+  document.getElementById('titulo').textContent = 'Ajustes';
+  document.getElementById('app').innerHTML = `
+    <div class="box">
+      <label style="font-size:14px;color:var(--gris)">Nombre de la bodega</label>
+      <input id="aBod" value="${esc(db.bodega)}" style="margin-top:5px">
+      <label style="font-size:14px;color:var(--gris);display:block;margin-top:12px">Avisar como "atrasado" después de (días)</label>
+      <input id="aDias" value="${db.diasAlerta}" inputmode="numeric" style="margin-top:5px">
+      <button class="btn b-verde" onclick="guardarAjustes()">Guardar</button>
+    </div>
+    <h3>Copia de seguridad</h3>
+    <div class="box">
+      <small style="font-size:14px">Descarga un archivo con todos tus datos para no perderlos si cambias de celular.</small>
+      <button class="btn b-verde" onclick="exportar()">⬇️ Descargar copia</button>
+      <button class="btn b-gris" onclick="document.getElementById('fileImp').click()">⬆️ Recuperar copia</button>
+      <input type="file" id="fileImp" accept=".json,application/json" style="display:none" onchange="importar(this)">
+    </div>
+    <h3>Ayuda</h3>
+    <div class="box">
+      <small style="font-size:14px">¿Dudas o problemas? Escríbenos.</small>
+      <a class="btn b-wsp" style="text-align:center;text-decoration:none" target="_blank"
+         href="https://wa.me/${MI_WHATSAPP}?text=${encodeURIComponent('Hola, necesito ayuda con mi Cuaderno Digital ('+db.bodega+')')}">💬 Soporte por WhatsApp</a>
+    </div>`;
+}
+function guardarAjustes(){
+  db.bodega = document.getElementById('aBod').value.trim() || 'Mi Bodega';
+  db.diasAlerta = parseInt(document.getElementById('aDias').value)||15;
+  guardar(); toast('Guardado ✓'); ir('inicio');
+}
+function exportar(){
+  const blob = new Blob([JSON.stringify(db)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fiados-'+db.bodega.replace(/\s+/g,'-')+'-'+hoyStr()+'.json';
+  a.click();
+}
+function importar(inp){
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(!d.clientes || !d.movs) throw 0;
+      preguntar(`Se reemplazarán tus datos actuales por la copia (<b>${d.clientes.length} clientes</b>).`, [
+        {t:'Sí, recuperar copia', c:'b-verde', fn:()=>{ db = d; guardar(); toast('Copia recuperada ✓'); ir('inicio'); render(); }}
+      ]);
+      inp.value = '';
+    }catch(e){ toast('Ese archivo no es una copia válida'); }
+  };
+  r.readAsText(f);
+}
+
+function toast(t){
+  const el = document.getElementById('toast');
+  el.textContent = t; el.style.display='block';
+  clearTimeout(el._t); el._t = setTimeout(()=>el.style.display='none', 2000);
+}
+
+/* ===================== BIENVENIDA (primera vez) ===================== */
+function bienvenida(){
+  abrirModal(`
+    <div class="bienv">
+      <div class="big">📒</div>
+      <h2 style="margin-bottom:6px">¡Bienvenido a tu Cuaderno Digital!</h2>
+      <p style="font-size:17px;color:var(--gris);margin:0 0 6px">Anota tus fiados fácil y cobra a tiempo por WhatsApp.</p>
+    </div>
+    <label>¿Cómo se llama tu bodega?</label>
+    <input id="bNom" placeholder="Ej: Bodega Doña Rosa" autocomplete="off">
+    <button class="btn b-verde" onclick="guardarBienvenida()">Empezar ✓</button>`);
+  setTimeout(()=>document.getElementById('bNom').focus(),150);
+}
+function guardarBienvenida(){
+  const n = document.getElementById('bNom').value.trim();
+  if(!n) return toast('Escribe el nombre de tu bodega');
+  db.bodega = n; db.bienvenida = true; guardar(); cerrarModal(); render();
+  toast('¡Listo! Ahora agrega tu primer cliente');
+}
+
+render();
+if(!db.bienvenida && !db.clientes.length && revisarDemo()) bienvenida();
+setInterval(revisarDemo, 60000);
+</script>
+</body>
+</html>
